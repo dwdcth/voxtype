@@ -1,5 +1,7 @@
 //! Transcription engine selection and per-engine configuration modules.
 
+pub mod ws_stream;
+pub use ws_stream::WsStreamConfig;
 use serde::{Deserialize, Serialize};
 
 mod cohere;
@@ -70,6 +72,8 @@ pub enum TranscriptionEngine {
     OpenVino,
     /// Use Soniox (cloud streaming WebSocket STT).
     Soniox,
+    /// Generic WebSocket streaming STT server
+    WsStream,
 }
 
 impl TranscriptionEngine {

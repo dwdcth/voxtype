@@ -14,6 +14,7 @@
 //! - Optionally OpenVINO Whisper for Intel NPU/CPU/GPU (when `openvino-whisper` feature is enabled)
 
 pub mod cli;
+pub mod generic_ws;
 #[cfg(feature = "parakeet")]
 pub mod parakeet_streaming;
 pub mod remote;
@@ -321,6 +322,14 @@ pub fn create_transcriber(config: &Config) -> Result<Box<dyn Transcriber>, Trans
             "OpenVINO engine requested but voxtype was not compiled with --features openvino-whisper"
                 .to_string(),
         )),
+        TranscriptionEngine::WsStream => {
+            let ws_config = config.ws_stream.as_ref().ok_or_else(|| {
+                TranscribeError::InitFailed(
+                    "WsStream engine selected but [ws_stream] config section is missing".into(),
+                )
+            })?;
+            Ok(Box::new(generic_ws::GenericWsTranscriber::new(ws_config)?))
+        }
     }
 }
 

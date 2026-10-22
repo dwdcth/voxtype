@@ -142,7 +142,8 @@ pub fn engine_feature_compiled(name: &str) -> bool {
         TranscriptionEngine::Omnilingual => cfg!(feature = "omnilingual"),
         TranscriptionEngine::Cohere => cfg!(feature = "cohere"),
         TranscriptionEngine::OpenVino => cfg!(feature = "openvino-whisper"),
-    }
+    
+            TranscriptionEngine::WsStream => true}
 }
 
 /// Set the active engine in the config file at `path`.

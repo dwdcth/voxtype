@@ -2,7 +2,7 @@ use super::{
     AudioConfig, CohereConfig, DolphinConfig, HotkeyConfig, MeetingConfig, MoonshineConfig,
     OmnilingualConfig, OpenVinoConfig, OutputConfig, ParaformerConfig, ParakeetConfig, Profile,
     SenseVoiceConfig, SonioxConfig, StatusConfig, StreamingConfig, TextConfig, TranscriptionEngine,
-    VadConfig, WhisperConfig,
+    VadConfig, WhisperConfig, WsStreamConfig,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -68,6 +68,7 @@ pub struct Config {
     /// (optional, only used when engine = "soniox")
     #[serde(default)]
     pub soniox: Option<SonioxConfig>,
+    pub ws_stream: Option<WsStreamConfig>,
 
     /// Shared sliding-window streaming engine tuning, used by every batch
     /// backend wrapped in `transcribe::sliding_window` (currently `whisper`
@@ -122,6 +123,7 @@ impl Default for Config {
             output: OutputConfig::default(),
             engine: TranscriptionEngine::default(),
             parakeet: None,
+            ws_stream: None,
             moonshine: None,
             sensevoice: None,
             paraformer: None,
@@ -391,7 +393,9 @@ impl Config {
                 .unwrap_or(false),
             // Soniox is a cloud backend; nothing to load on demand.
             TranscriptionEngine::Soniox => false,
-        }
+        
+            crate::config::TranscriptionEngine::WsStream => false,
+            }
     }
 
     /// The language code configured for the active engine, if it has one.
@@ -475,7 +479,9 @@ impl Config {
                 .as_ref()
                 .map(|s| s.model.as_str())
                 .unwrap_or("soniox (not configured)"),
-        }
+        
+            crate::config::TranscriptionEngine::WsStream => "ws-stream",
+            }
     }
 
     /// Make `engine` active with `model` as its model, materializing the
@@ -518,7 +524,9 @@ impl Config {
             TranscriptionEngine::Soniox => {
                 self.soniox.get_or_insert_with(Default::default).model = model
             }
-        }
+        
+            crate::config::TranscriptionEngine::WsStream => {}
+            }
     }
 
     /// Get a named profile by name

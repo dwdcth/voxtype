@@ -65,7 +65,8 @@ pub fn required_feature(engine: TranscriptionEngine) -> Option<&'static str> {
     match engine {
         TranscriptionEngine::Whisper => None,
         other => Some(other.name()),
-    }
+    
+            TranscriptionEngine::WsStream => None}
 }
 
 /// Returns `Some` when the configured engine isn't available in the running
