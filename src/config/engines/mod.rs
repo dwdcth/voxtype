@@ -1,7 +1,5 @@
 //! Transcription engine selection and per-engine configuration modules.
 
-pub mod ws_stream;
-pub use ws_stream::WsStreamConfig;
 use serde::{Deserialize, Serialize};
 
 mod cohere;
@@ -13,6 +11,7 @@ mod paraformer;
 mod parakeet;
 mod sensevoice;
 mod soniox;
+mod ws_stream;
 
 pub use cohere::CohereConfig;
 pub use dolphin::DolphinConfig;
@@ -23,6 +22,7 @@ pub use paraformer::ParaformerConfig;
 pub use parakeet::{ParakeetConfig, ParakeetModelType};
 pub use sensevoice::SenseVoiceConfig;
 pub use soniox::SonioxConfig;
+pub use ws_stream::WsStreamConfig;
 
 /// Transcription engine selection (which ASR technology to use)
 #[derive(

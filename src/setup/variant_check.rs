@@ -63,10 +63,9 @@ pub enum Remediation {
 /// the feature name is just the engine's canonical name.
 pub fn required_feature(engine: TranscriptionEngine) -> Option<&'static str> {
     match engine {
-        TranscriptionEngine::Whisper => None,
+        TranscriptionEngine::Whisper | TranscriptionEngine::WsStream => None,
         other => Some(other.name()),
-    
-            TranscriptionEngine::WsStream => None}
+    }
 }
 
 /// Returns `Some` when the configured engine isn't available in the running

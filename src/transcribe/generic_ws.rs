@@ -69,27 +69,7 @@ impl GenericWsTranscriber {
         })
     }
 
-    /// Encode f32 samples to binary bytes for WebSocket transmission
-    fn encode_samples(&self, samples: &[f32]) -> Vec<u8> {
-        match self.encoding.as_str() {
-            "s16le" => {
-                let mut buf = Vec::with_capacity(samples.len() * 2);
-                for &s in samples {
-                    let v = (s.clamp(-1.0, 1.0) * 32767.0) as i16;
-                    buf.extend_from_slice(&v.to_le_bytes());
-                }
-                buf
-            }
-            _ => {
-                // f32 (default)
-                let mut buf = Vec::with_capacity(samples.len() * 4);
-                for &s in samples {
-                    buf.extend_from_slice(&s.to_le_bytes());
-                }
-                buf
-            }
-        }
-    }
+
 }
 
 /// JSON messages from the server
@@ -251,6 +231,10 @@ impl StreamingTranscriber for GenericWsTranscriber {
 
 /// Batch transcription via WebSocket (one-shot session: start → binary → stop → final)
 impl Transcriber for GenericWsTranscriber {
+    /// Enable streaming: tell voxtype this backend supports partial results
+    fn as_streaming(&self) -> Option<&dyn StreamingTranscriber> {
+        Some(self)
+    }
     fn transcribe(&self, samples: &[f32]) -> Result<String, TranscribeError> {
         if samples.is_empty() {
             return Ok(String::new());
