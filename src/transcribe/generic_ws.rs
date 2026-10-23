@@ -13,7 +13,9 @@
 //!
 //! Server → Client:
 //!   Text   {"type":"ready"}
-//!   Text   {"type":"partial","text":"...","segment_id":1}
+//!   Text   {"type":"partial","text":"...","segment_id":1}     (delta suffix)
+//!   Text   {"type":"revise","backspace":N,"text":"...","segment_id":1}
+//!          (in-place rewrite: erase N chars of the typed tail, commit text)
 //!   Text   {"type":"final","text":"...","segment_id":1}
 //!   Text   {"type":"error","message":"..."}
 //!   Text   {"type":"ended"}
@@ -79,6 +81,9 @@ enum ServerMessage {
     Ready,
     Partial { text: String, segment_id: Option<u64> },
     Final { text: String, segment_id: Option<u64> },
+    /// Engine-driven in-place revision: backspace `backspace` chars of the
+    /// previously-typed tail, then commit `text` (WeType-style live rewrite).
+    Revise { backspace: u64, text: String, segment_id: Option<u64> },
     Error { message: Option<String> },
     Ended,
 }
@@ -153,6 +158,13 @@ async fn run_ws_session(
                         match serde_json::from_str::<ServerMessage>(&text) {
                             Ok(ServerMessage::Partial { text, segment_id: sid }) => {
                                 let _ = events_tx.send(StreamingEvent::Partial {
+                                    text,
+                                    segment_id: sid.unwrap_or(segment_id),
+                                }).await;
+                            }
+                            Ok(ServerMessage::Revise { backspace, text, segment_id: sid }) => {
+                                let _ = events_tx.send(StreamingEvent::Replace {
+                                    backspace: backspace as usize,
                                     text,
                                     segment_id: sid.unwrap_or(segment_id),
                                 }).await;
